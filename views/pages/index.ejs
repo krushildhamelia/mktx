@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MKTX Quote Permission Generator</title>
+  <link rel="stylesheet" type="text/css" href="/stylesheets/main.css" />
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery.form/3.51/jquery.form.min.js"></script>
+</head>
+
+<body>
+  <form id="uploadForm"
+      enctype="multipart/form-data"
+      action="/api/csv"
+      method="post">
+    <input type="file" name="csv" />
+    <p id="text">Drag your files here or click in this area.</p>
+    <button type="submit">Upload</button>
+    <span id="status"></span>
+    <div id="download"></div>
+  </form>
+
+
+  <script>
+    $("input[type=file]").on('change',function(e){
+      try {
+        $("#text").html("File Selected: " + e.target.files[0].name);
+      } catch(e) {
+        $("#text").html("File Selected");
+      }
+      console.log(e);
+    });
+    $(document).ready(function() {
+  
+       $('#uploadForm').submit(function() {
+          $("#status").empty().text("File is uploading...");
+          $(this).ajaxSubmit({
+  
+              error: (xhr) => {
+                $("#status").empty().text('Error: ' + xhr.status);
+              },
+  
+              success: function(response) {
+                console.log(response);
+                $("#status").empty();
+                if (response.error) {
+                  $("#status").empty().text(response.error);
+                }
+                if (response.download) {
+                  $("#download").html(response.download);
+                }
+              }
+      });
+          //Very important line, it disable the page refresh.
+      return false;
+      });    
+  });
+  </script>
+</body>
+  
+</html>
