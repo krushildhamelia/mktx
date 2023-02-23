@@ -16,6 +16,10 @@ process.on('uncaughtException', (error)  => {
 
 })
 
+
+!fs.existsSync("uploads") && fs.mkdirSync("uploads");
+!fs.existsSync("download") && fs.mkdirSync("download");
+
 const storage =   multer.diskStorage({
   destination: function (req, file, callback) {
     callback(null, './uploads');
@@ -30,7 +34,8 @@ const memoryStorage = multer.memoryStorage();
 
 var upload = multer({ storage : storage}).single('csv');
 
-app.post('/api/csv',function(req,res){
+app.post('/api/csv', function(req,res) {
+  console.log("req", req.file);
   upload(req,res,function(err) {
     const resp = {
       error: null,
@@ -42,7 +47,7 @@ app.post('/api/csv',function(req,res){
         return res.json(resp);
       }
       console.log("file", req.file); 
-      csv2json().fromFile("uploads/import.csv").then(data => {
+      csv2json().fromFile("./uploads/import.csv").then(data => {
         console.log(data);
         let newData = [];
         if (data instanceof Array) {
@@ -106,6 +111,7 @@ app.get('/api/quotePermission/:id',function(req,res){
 
 app.use(function (err, req, res, next) {
   res.status(500);
+  console.log(err);
   res.send("Oops, something went wrong.")
 });
 
@@ -117,3 +123,5 @@ app.use(express.static(path.join(__dirname, 'public')))
   .set('view engine', 'ejs')
   .get('/', (req, res) => res.render('pages/index'))
   .listen(PORT, () => console.log(`Listening on ${ PORT }`))
+
+module.exports = app;
